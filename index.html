@@ -14,6 +14,8 @@
 <!-- GSAP & ScrollTrigger -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- Leaflet Map CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
 <style>
   :root {
@@ -2726,6 +2728,88 @@
     .sticky-wa-container { bottom: 1.25rem; right: 1.25rem; }
     .sticky-wa-fab { width: 48px; height: 48px; font-size: 1.3rem; }
   }
+
+  /* --- MAP VIEW --- */
+  .contact-map-wrap {
+    width: 100%;
+    margin-top: 4rem;
+  }
+  .contact-map-container {
+    height: 400px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    background: var(--surface);
+  }
+  #contact-map {
+    width: 100%;
+    height: 100%;
+  }
+  .custom-map-marker {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .custom-map-marker::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: var(--primary);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .custom-map-marker-pin {
+    width: 38px;
+    height: 38px;
+    border-radius: 50% 50% 50% 0;
+    background: var(--primary);
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 6px;
+    top: -2px;
+    box-shadow: 0 4px 8px rgba(var(--primary-rgb), 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #fff;
+  }
+  .custom-map-marker-logo {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #fff;
+    transform: rotate(45deg);
+    object-fit: contain;
+    padding: 1px;
+  }
+  
+  /* Leaflet Popups Style Override */
+  .leaflet-popup-content-wrapper {
+    background: var(--surface) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border);
+    color: var(--fg) !important;
+    font-family: var(--ff-body) !important;
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: var(--radius-sm) !important;
+  }
+  .leaflet-popup-tip {
+    background: var(--surface) !important;
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .leaflet-container a.leaflet-popup-close-button {
+    color: var(--fg-muted) !important;
+  }
 </style>
 </head>
 <body>
@@ -3666,7 +3750,9 @@
             <div class="contact-icon-wrapper"><i class="fas fa-map-marker-alt"></i></div>
             <div>
               <div class="contact-lbl">Address</div>
-              <div class="contact-val">Ashvathy Art Printers, Sivakasi, Tamil Nadu, India</div>
+              <div class="contact-val">
+                <a href="https://www.google.com/maps/place/Ashvathy+Art+Printers/@9.4386226,77.782557,17z/data=!3m1!4b1!4m6!3m5!1s0x3b06cfd3844f50c5:0x6e8009fc8ff1ccf!8m2!3d9.4386226!4d77.782557!16s%2Fg%2F11xlzhvscl?entry=ttu&g_ep=EgoyMDI2MDYyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Ashvathy Art Printers, Sivakasi, Tamil Nadu, India</a>
+              </div>
             </div>
           </div>
           <!-- Item 2: Phone -->
@@ -3753,6 +3839,13 @@
         </div>
       </div>
     </div>
+    
+    <!-- Map Container -->
+    <div class="contact-map-wrap reveal">
+      <div class="contact-map-container">
+        <div id="contact-map"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -3771,7 +3864,7 @@
         <div class="footer-contact-details">
           <div class="footer-contact-row">
             <i class="fas fa-map-marker-alt"></i>
-            <span>Sivakasi, Tamil Nadu, India</span>
+            <a href="https://www.google.com/maps/place/Ashvathy+Art+Printers/@9.4386226,77.782557,17z/data=!3m1!4b1!4m6!3m5!1s0x3b06cfd3844f50c5:0x6e8009fc8ff1ccf!8m2!3d9.4386226!4d77.782557!16s%2Fg%2F11xlzhvscl?entry=ttu&g_ep=EgoyMDI2MDYyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Ashvathy Art Printers, Sivakasi, Tamil Nadu, India</a>
           </div>
           <div class="footer-contact-row">
             <i class="fas fa-phone-alt"></i>
@@ -3846,6 +3939,9 @@
     </div>
   </div>
 </footer>
+
+<!-- Leaflet Map JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
 // Theme Management Script (Light/Dark Mode)
@@ -4154,6 +4250,62 @@ window.addEventListener('load', () => {
       cursorLabel.textContent = '';
     });
   });
+
+  // Initialize Leaflet Map
+  const mapElement = document.getElementById('contact-map');
+  if (mapElement) {
+    const map = L.map('contact-map', {
+      scrollWheelZoom: false,
+      zoomControl: true
+    }).setView([9.4386226, 77.782557], 16);
+
+    const lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    });
+
+    const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    });
+
+    // Detect theme and add appropriate layer
+    const getTheme = () => document.documentElement.getAttribute('data-theme') || 'light';
+    let currentTiles = getTheme() === 'dark' ? darkTiles : lightTiles;
+    currentTiles.addTo(map);
+
+    // Custom marker icon matching the printers branding (logo.png inside a custom styled pin)
+    const customIcon = L.divIcon({
+      html: '<div class="custom-map-marker"><div class="custom-map-marker-pin"><img class="custom-map-marker-logo" src="logo.png" alt="Map Logo"></div></div>',
+      className: 'custom-leaflet-icon',
+      iconSize: [50, 50],
+      iconAnchor: [25, 48],
+      popupAnchor: [0, -48]
+    });
+
+    // Add marker
+    const marker = L.marker([9.4386226, 77.782557], { icon: customIcon }).addTo(map);
+    marker.bindPopup("<b>Ashvathy Art Printers</b><br>Sivakasi, Tamil Nadu, India").openPopup();
+
+    // Listen for theme changes to toggle map styling dynamically
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+          const theme = getTheme();
+          if (theme === 'dark') {
+            map.removeLayer(lightTiles);
+            darkTiles.addTo(map);
+          } else {
+            map.removeLayer(darkTiles);
+            lightTiles.addTo(map);
+          }
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+  }
 });
 
 // Quote Request Submit Function
