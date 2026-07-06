@@ -3777,7 +3777,7 @@
             <div class="contact-icon-wrapper"><i class="fas fa-envelope"></i></div>
             <div>
               <div class="contact-lbl">Email</div>
-              <div class="contact-val"><a href="mailto:ashvathyartprinters@gmail.com">ashvathyartprinters@gmail.com</a></div>
+              <div class="contact-val"><a href="mailto:info@ashvathyprinters.com">info@ashvathyprinters.com</a></div>
             </div>
           </div>
         </div>
@@ -3832,7 +3832,8 @@
             <textarea id="details" placeholder=" " rows="4"></textarea>
             <label for="details">Project Details</label>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Send Quote Request</button>
+          <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Send Quote Request</button>
+          <div id="form-error" style="display: none; color: var(--accent); margin-top: 1rem; text-align: center; font-size: 0.9rem; font-weight: 600;"></div>
           <p style="font-size:0.8rem; color:var(--fg-muted); text-align:center;">We respond within 24 hours. Or WhatsApp for instant reply.</p>
         </form>
         
@@ -3885,7 +3886,7 @@
           </div>
           <div class="footer-contact-row">
             <i class="fas fa-envelope"></i>
-            <a href="mailto:ashvathyartprinters@gmail.com">ashvathyartprinters@gmail.com</a>
+            <a href="mailto:info@ashvathyprinters.com">info@ashvathyprinters.com</a>
           </div>
         </div>
       </div>
@@ -4325,22 +4326,77 @@ window.addEventListener('load', () => {
 function handleSubmit(e) {
   e.preventDefault();
   
-  // Animate form dissolution
   const form = document.getElementById('quote-form');
   const success = document.getElementById('form-success');
+  const errorEl = document.getElementById('form-error');
+  const submitBtn = document.getElementById('submit-btn');
   
-  gsap.to(form, {
-    opacity: 0,
-    y: -20,
-    duration: 0.4,
-    onComplete: () => {
-      form.style.display = 'none';
-      success.style.display = 'block';
-      gsap.fromTo(success, 
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
-      );
+  if (!submitBtn || !form || !success) return;
+  
+  // Reset error message
+  if (errorEl) {
+    errorEl.style.display = 'none';
+    errorEl.textContent = '';
+  }
+  
+  // Set button loading state
+  const originalBtnContent = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+  
+  // Collect values
+  const data = {
+    fullname: document.getElementById('fullname').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    service: document.getElementById('service').value,
+    details: document.getElementById('details').value
+  };
+  
+  fetch('send_mail.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(err => { throw new Error(err.message || 'Server error'); });
     }
+    return response.json();
+  })
+  .then(res => {
+    if (res.success) {
+      // Animate form dissolution
+      gsap.to(form, {
+        opacity: 0,
+        y: -20,
+        duration: 0.4,
+        onComplete: () => {
+          form.style.display = 'none';
+          success.style.display = 'block';
+          gsap.fromTo(success, 
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+          );
+        }
+      });
+    } else {
+      throw new Error(res.message || 'Failed to send form.');
+    }
+  })
+  .catch(err => {
+    console.error('Submission error:', err);
+    if (errorEl) {
+      errorEl.textContent = err.message || 'An error occurred. Please try again or contact us directly.';
+      errorEl.style.display = 'block';
+    } else {
+      alert(err.message || 'An error occurred. Please try again.');
+    }
+    // Restore button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnContent;
   });
 }
 </script>
